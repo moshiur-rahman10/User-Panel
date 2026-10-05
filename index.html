@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MH Task BD - আর্নিং প্ল্যাটফর্ম</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --accent: #00e676;
+      --danger: #ff5252;
+      --text: #ffffff;
+      --subtext: #aaaaaa;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 15px;
+    }
+    .container { max-width: 500px; margin: 0 auto; }
+    
+    .header-box {
+      background: var(--card-bg);
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      margin-bottom: 15px;
+    }
+    
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #2a2a2a;
+      color: #fff;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { opacity: 0.9; }
+    
+    .nav-tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 5px;
+      background: #2a2a2a;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      margin: 0;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .notice-box {
+      background: #252510;
+      border-left: 4px solid #ffeb3b;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .stat-box {
+      background: #2a2a2a;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .number-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #2a2a2a;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px dashed var(--accent);
+      margin-bottom: 12px;
+    }
+    
+    .task-item {
+      border: 1px solid #333;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #262626;
+    }
+
+    #dashboardView, #authView { display: none; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- ================= ১. রেজিস্ট্রেশন ও লগইন ভিউ ================= -->
+    <div id="authView">
+      <div class="header-box">
+        <h2 style="color:var(--accent); margin:0;">MH Task BD</h2>
+        <p style="color:var(--subtext); font-size:13px; margin:5px 0 0 0;">লগইন বা রেজিস্টার করুন</p>
+      </div>
+
+      <div class="card">
+        <h3 id="formTitle" style="margin-top:0; color:var(--accent);">লগইন করুন</h3>
+        
+        <div id="nameGroup" style="display:none;">
+          <label>আপনার নাম:</label>
+          <input type="text" id="userName" placeholder="আপনার পুরো নাম">
+        </div>
+
+        <label>মোবাইল নম্বর:</label>
+        <input type="text" id="userPhone" placeholder="017XXXXXXXX">
+
+        <label>পাসওয়ার্ড:</label>
+        <input type="password" id="userPass" placeholder="******">
+
+        <button id="authSubmitBtn" onclick="handleAuth()">লগইন করুন</button>
+
+        <p style="text-align:center; font-size:13px; color:var(--subtext); cursor:pointer; margin-bottom:0;" onclick="toggleAuthMode()">
+          <span id="toggleText">অ্যাকাউন্ট নেই? নতুন অ্যাকাউন্ট তৈরি করুন</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- ================= ২. মূল ইউজার ড্যাশবোর্ড ভিউ ================= -->
+    <div id="dashboardView">
+      
+      <!-- ইউজার প্রফাইল হেডার -->
+      <div class="header-box" style="text-align:left; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h3 id="profileName" style="margin:0; color:var(--accent);">ইউজার নাম</h3>
+          <p id="profilePhone" style="margin:3px 0 0 0; font-size:12px; color:var(--subtext);">017XXXXXXXX</p>
+        </div>
+        <button style="width:auto; padding:6px 12px; font-size:12px; background:var(--danger); color:#fff;" onclick="logout()">লগআউট</button>
+      </div>
+
+      <!-- নোটিশ -->
+      <div class="notice-box" id="siteNotice">
+        📢 প্ল্যান কিনে প্রতিদিন টাস্ক পূরণ করে ইনকাম করুন!
+      </div>
+
+      <!-- স্ট্যাটস (ব্যালেন্স ও প্ল্যান) -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <small style="color:var(--subtext);">মেইন ওয়ালেট</small>
+          <h3 style="margin:5px 0 0 0; color:var(--accent);">৳ <span id="userBalance">০</span></h3>
+        </div>
+        <div class="stat-box">
+          <small style="color:var(--subtext);">বর্তমান প্ল্যান</small>
+          <h3 style="margin:5px 0 0 0; color:#ffeb3b;" id="userPlan">ফ্রি</h3>
+        </div>
+      </div>
+
+      <!-- নেভিগেশন অপশনসমূহ -->
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('tasks')">কাজ (Tasks)</button>
+        <button class="tab-btn" onclick="switchTab('plans')">প্ল্যান (Plans)</button>
+        <button class="tab-btn" onclick="switchTab('deposit')">ডিপোজিট</button>
+        <button class="tab-btn" onclick="switchTab('withdraw')">উইথড্র</button>
+      </div>
+
+      <!-- ট্যাব ১: টাস্ক ও আর্নিং সিস্টেম -->
+      <div id="tab-tasks" class="tab-content active">
+        <div class="card">
+          <h3 style="margin-top:0;">দৈনিক টাস্কসমূহ</h3>
+          <p style="font-size:12px; color:var(--subtext); margin-bottom:15px;">
+            আজকের বাকি টাস্ক: <strong style="color:var(--accent);" id="taskLimit">০</strong> টি | 
+            প্রতি টাস্কে আর্নিং: <strong style="color:var(--accent);" id="taskReward">৳০</strong>
+          </p>
+
+          <!-- টাস্ক ১ -->
+          <div class="task-item">
+            <strong>১. ইউটিউব চ্যানেল সাবস্ক্রাইব করা</strong><br>
+            <small style="color:var(--subtext);">চ্যানেল সাবস্ক্রাইব করে কাজ শেষ করুন</small>
+            <button style="margin-top:8px;" onclick="completeTask('ইউটিউব চ্যানেল সাবস্ক্রাইব')">টাস্কটি করুন</button>
+          </div>
+
+          <!-- টাস্ক ২ -->
+          <div class="task-item">
+            <strong>২. ইউটিউব ভিডিও দেখা</strong><br>
+            <small style="color:var(--subtext);">পূর্ণ ভিডিও দেখে রিওয়ার্ড নিন</small>
+            <button style="margin-top:8px;" onclick="completeTask('ইউটিউব ভিডিও দেখা')">টাস্কটি করুন</button>
+          </div>
+
+          <!-- টাস্ক ৩ -->
+          <div class="task-item">
+            <strong>৩. অ্যাড (Ads) দেখা</strong><br>
+            <small style="color:var(--subtext);">বিজ্ঞাপন দেখে সরাসরি ব্যালেন্সে টাকা যুক্ত করুন</small>
+            <button style="margin-top:8px;" onclick="completeTask('অ্যাড দেখা')">টাস্কটি করুন</button>
+          </div>
+
+          <!-- টাস্ক ৪ -->
+          <div class="task-item">
+            <strong>৪. ফেসবুক ফলো দেওয়া</strong><br>
+            <small style="color:var(--subtext);">পেজ ফলো করুন এবং পয়েন্ট অর্জন করুন</small>
+            <button style="margin-top:8px;" onclick="completeTask('ফেসবুক ফলো')">টাস্কটি করুন</button>
+          </div>
+
+          <!-- টাস্ক ৫ -->
+          <div class="task-item">
+            <strong>৫. টেলিগ্রাম চ্যানেল সাবস্ক্রাইব করা</strong><br>
+            <small style="color:var(--subtext);">অফিসিয়াল টেলিগ্রাম গ্রুপে যুক্ত হন</small>
+            <button style="margin-top:8px;" onclick="completeTask('টেলিগ্রাম চ্যানেল')">টাস্কটি করুন</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ট্যাব ২: প্রিমিয়াম প্ল্যান ও সাবস্ক্রিপশন -->
+      <div id="tab-plans" class="tab-content">
+        <div class="card">
+          <h3 style="margin-top:0; color:var(--accent);">প্রিমিয়াম সাবস্ক্রিপশন</h3>
+          
+          <!-- প্ল্যান ১ -->
+          <div style="border:1px solid #444; padding:12px; border-radius:8px; margin-bottom:12px; background:#252525;">
+            <h4 style="margin:0; color:var(--accent);">প্ল্যান ১ (বেসিক)</h4>
+            <p style="margin:5px 0; font-size:13px;">দাম: <strong>৳১০০</strong> | মেয়াদ: <strong>১ দিন</strong></p>
+            <p style="margin:5px 0; font-size:12px; color:var(--subtext);">দৈনিক টাস্ক: ৫ টি | প্রতি টাস্কে আর্নিং: ৳২৫</p>
+            <button onclick="buyPlan('প্ল্যান ১ (বেসিক)', 100, 1, 5, 25)">প্ল্যান কিনুন</button>
+          </div>
+
+          <!-- প্ল্যান ২ -->
+          <div style="border:1px solid #ff9800; padding:12px; border-radius:8px; margin-bottom:12px; background:#252525;">
+            <h4 style="margin:0; color:#ff9800;">প্ল্যান ২ (প্রিমিয়াম)</h4>
+            <p style="margin:5px 0; font-size:13px;">দাম: <strong>৳৫০০</strong> | মেয়াদ: <strong>৭ দিন</strong></p>
+            <p style="margin:5px 0; font-size:12px; color:var(--subtext);">দৈনিক টাস্ক: ১০ টি | প্রতি টাস্কে আর্নিং: ৳১০</p>
+            <button style="background:#ff9800;" onclick="buyPlan('প্ল্যান ২ (প্রিমিয়াম)', 500, 7, 10, 10)">প্ল্যান কিনুন</button>
+          </div>
+
+          <!-- প্ল্যান ৩ -->
+          <div style="border:1px solid #ffeb3b; padding:12px; border-radius:8px; background:#252525;">
+            <h4 style="margin:0; color:#ffeb3b;">প্ল্যান ৩ (ভিআইপি)</h4>
+            <p style="margin:5px 0; font-size:13px;">দাম: <strong>৳১০০০</strong> | মেয়াদ: <strong>২০ দিন</strong></p>
+            <p style="margin:5px 0; font-size:12px; color:var(--subtext);">দৈনিক টাস্ক: ২০ টি | প্রতি টাস্কে আর্নিং: ৳১৫</p>
+            <button style="background:#ffeb3b; color:#000;" onclick="buyPlan('প্ল্যান ৩ (ভিআইপি)', 1000, 20, 20, 15)">প্ল্যান কিনুন</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ট্যাব ৩: ডিপোজিট অপশন -->
+      <div id="tab-deposit" class="tab-content">
+        <div class="card">
+          <h3 style="margin-top:0;">ডিপোজিট করুন (Bkash/Nagad)</h3>
+          <p style="font-size: 12px; color: var(--subtext);">নিচের এডমিন নম্বরে Send Money করে ফর্ম পূরণ করুন:</p>
+
+          <div class="number-box">
+            <span id="adminNumber" style="font-weight: bold; color: var(--accent);">01746960217</span>
+            <button style="width:auto; margin:0; padding:5px 10px; font-size:12px;" onclick="copyNumber()">কপি</button>
+          </div>
+
+          <label>পেমেন্ট মেথড:</label>
+          <select id="depMethod">
+            <option value="bkash">বিকাশ (Send Money)</option>
+            <option value="nagad">নগদ (Send Money)</option>
+          </select>
+
+          <label>পরিমাণ (৳):</label>
+          <input type="number" id="depAmount" placeholder="টাকার পরিমাণ">
+
+          <label>ট্রানজেকশন আইডি (TrxID):</label>
+          <input type="text" id="depTrx" placeholder="যেমন: 9J7X8Y2Z">
+
+          <button onclick="submitDeposit()">ডিপোজিট সাবমিট করুন</button>
+        </div>
+      </div>
+
+      <!-- ট্যাব ৪: উইথড্র অপশন -->
+      <div id="tab-withdraw" class="tab-content">
+        <div class="card">
+          <h3 style="margin-top:0;">উইথড্র করুন</h3>
+          <label>বিকাশ / নগদ নম্বর:</label>
+          <input type="text" id="withPhone" placeholder="017XXXXXXXX">
+
+          <label>পরিমাণ (৳):</label>
+          <input type="number" id="withAmount" placeholder="সর্বনিম্ন ৩০০ টাকা">
+
+          <button onclick="submitWithdraw()">উইথড্র আবেদন করুন</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ফায়ারবেস স্ক্রিপ্ট -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, addDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // ⚠️ আপনার ফায়ারবেস কনফিগারেশন বসান
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPsO4k8klsTfyDEW5T5jr96uzcvmQLHu8",
+      authDomain: "mh-task-bd.firebaseapp.com",
+      projectId: "mh-task-bd",
+      storageBucket: "mh-task-bd.firebasestorage.app",
+      messagingSenderId: "999695777023",
+      appId: "1:999695777023:web:26e593a8fcb207eca260ca"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let isSignUp = false;
+    let currentUser = null;
+    let userCurrentTaskLimit = 0;
+    let userCurrentTaskReward = 0;
+
+    // লগইন / সাইনআপ ফর্ম টগল
+    window.toggleAuthMode = function() {
+      isSignUp = !isSignUp;
+      document.getElementById("formTitle").innerText = isSignUp ? "নতুন অ্যাকাউন্ট তৈরি করুন" : "লগইন করুন";
+      document.getElementById("authSubmitBtn").innerText = isSignUp ? "রেজিস্টার করুন" : "লগইন করুন";
+      document.getElementById("toggleText").innerText = isSignUp ? "অ্যাকাউন্ট আছে? লগইন করুন" : "অ্যাকাউন্ট নেই? নতুন অ্যাকাউন্ট তৈরি করুন";
+      document.getElementById("nameGroup").style.display = isSignUp ? "block" : "none";
+    };
+
+    // সাইনআপ ও লগইন হ্যান্ডলার
+    window.handleAuth = async function() {
+      const phone = document.getElementById("userPhone").value.trim();
+      const pass = document.getElementById("userPass").value.trim();
+      const name = document.getElementById("userName").value.trim();
+
+      if(!phone || !pass) return alert("ফোন নম্বর ও পাসওয়ার্ড দিন!");
+      const fakeEmail = `${phone}@mhtask.com`;
+
+      try {
+        if(isSignUp) {
+          if(!name) return alert("আপনার নাম দিন!");
+          const res = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
+          await setDoc(doc(db, "users", res.user.uid), {
+            name: name,
+            phone: phone,
+            balance: 0,
+            currentPlan: "ফ্রি",
+            dailyTasksLeft: 0,
+            taskReward: 0,
+            createdAt: new Date().toISOString()
+          });
+          alert("রেজিস্ট্রেশন সফল হয়েছে!");
+        } else {
+          await signInWithEmailAndPassword(auth, fakeEmail, pass);
+          alert("সফলভাবে লগইন হয়েছে!");
+        }
+      } catch(e) {
+        alert("ত্রুটি: " + e.message);
+      }
+    };
+
+    // অটো লগইন মনিটর
+    onAuthStateChanged(auth, (user) => {
+      if(user) {
+        currentUser = user;
+        document.getElementById("authView").style.display = "none";
+        document.getElementById("dashboardView").style.display = "block";
+        loadUserData(user.uid);
+      } else {
+        currentUser = null;
+        document.getElementById("authView").style.display = "block";
+        document.getElementById("dashboardView").style.display = "none";
+      }
+    });
+
+    // ইউজারের ডেটা রিয়েলটাইমে লোড করা
+    function loadUserData(uid) {
+      onSnapshot(doc(db, "users", uid), (docSnap) => {
+        if(docSnap.exists()) {
+          const data = docSnap.data();
+          document.getElementById("profileName").innerText = data.name || "ইউজার";
+          document.getElementById("profilePhone").innerText = data.phone;
+          document.getElementById("userBalance").innerText = data.balance || 0;
+          document.getElementById("userPlan").innerText = data.currentPlan || "ফ্রি";
+          
+          userCurrentTaskLimit = data.dailyTasksLeft || 0;
+          userCurrentTaskReward = data.taskReward || 0;
+          
+          document.getElementById("taskLimit").innerText = userCurrentTaskLimit;
+          document.getElementById("taskReward").innerText = "৳" + userCurrentTaskReward;
+        }
+      });
+    }
+
+    // নেভিগেশন ট্যাব সুইচ
+    window.switchTab = function(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+    };
+
+    // টাস্ক সম্পন্ন ও অটোমেটিক ইনকাম যোগ
+    window.completeTask = async function(taskName) {
+      if(!currentUser) return;
+      if(userCurrentTaskLimit <= 0) {
+        alert("আপনার আজকের টাস্ক লিমিট শেষ! ইনকাম বাড়াতে প্ল্যান কিনুন।");
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, "users", currentUser.uid), {
+          balance: increment(userCurrentTaskReward),
+          dailyTasksLeft: increment(-1)
+        });
+        alert(`'${taskName}' সফল হয়েছে! মেইন ওয়ালেটে ৳${userCurrentTaskReward} যুক্ত হয়েছে।`);
+      } catch(e) {
+        alert("ত্রুটি হয়েছে!");
+      }
+    };
+
+    // প্ল্যান কেনা সিস্টেম
+    window.buyPlan = async function(planName, price, validityDays, dailyTasks, rewardPerTask) {
+      if(!currentUser) return;
+      const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+      const currentBal = userDoc.data().balance || 0;
+
+      if(currentBal < price) {
+        alert("আপনার ওয়ালেটে পর্যাপ্ত টাকা নেই! আগে ডিপোজিট করুন।");
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, "users", currentUser.uid), {
+          balance: increment(-price),
+          currentPlan: planName,
+          dailyTasksLeft: dailyTasks,
+          taskReward: rewardPerTask
+        });
+        alert(`অভিনন্দন! আপনি ৳${price} দিয়ে '${planName}' সফলভাবে কিনেছেন।`);
+        switchTab('tasks');
+      } catch(e) {
+        alert("ত্রুটি হয়েছে!");
+      }
+    };
+
+    // নম্বর কপি
+    window.copyNumber = function() {
+      const num = document.getElementById("adminNumber").innerText;
+      navigator.clipboard.writeText(num);
+      alert("নম্বর কপি করা হয়েছে: " + num);
+    };
+
+    // ডিপোজিট জমা দেওয়া
+    window.submitDeposit = async function() {
+      const method = document.getElementById("depMethod").value;
+      const amount = Number(document.getElementById("depAmount").value);
+      const trx = document.getElementById("depTrx").value;
+
+      if(!amount || !trx) return alert("সব তথ্য পূরণ করুন!");
+
+      try {
+        await addDoc(collection(db, "deposits"), {
+          userId: currentUser.uid,
+          phone: document.getElementById("profilePhone").innerText,
+          method: method,
+          amount: amount,
+          trxId: trx,
+          status: "pending",
+          date: new Date().toISOString()
+        });
+        alert("ডিপোজিট রিকোয়েস্ট জমা হয়েছে! অ্যাডমিন চেক করে অ্যাপ্রুভ করবেন।");
+        document.getElementById("depAmount").value = "";
+        document.getElementById("depTrx").value = "";
+      } catch(e) {
+        alert("ত্রুটি হয়েছে: " + e.message);
+      }
+    };
+
+    // উইথড্র জমা দেওয়া
+    window.submitWithdraw = async function() {
+      const phone = document.getElementById("withPhone").value;
+      const amount = Number(document.getElementById("withAmount").value);
+
+      if(!phone || amount < 300) return alert("নম্বর এবং সর্বনিম্ন ৩০০ টাকা দিন!");
+
+      try {
+        await addDoc(collection(db, "withdrawals"), {
+          userId: currentUser.uid,
+          phone: phone,
+          amount: amount,
+          status: "pending",
+          date: new Date().toISOString()
+        });
+        alert("উইথড্র রিকোয়েস্ট সফলভাবে জমা হয়েছে!");
+        document.getElementById("withPhone").value = "";
+        document.getElementById("withAmount").value = "";
+      } catch(e) {
+        alert("ত্রুটি হয়েছে!");
+      }
+    };
+
+    // লগআউট
+    window.logout = function() {
+      signOut(auth);
+    };
+  </script>
+</body>
+</html>
